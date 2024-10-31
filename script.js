@@ -5,6 +5,34 @@ const todoContainer = document.querySelector(".todo__container");
 const todoValues = [];
 let todoElements = [];
 
+// update the current date
+function updateDate() {
+  const now = new Date();
+  const options = { year: 'numeric', month: 'long', day: 'numeric' };
+  const dateString = now.toLocaleDateString('en-US', options);
+  
+  document.querySelector('.today-date').textContent = dateString;
+}
+
+// calling the function
+updateDate();
+
+
+// update current time
+function updateTime() {
+  const now = new Date();
+  const options = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false };
+  const timeString = now.toLocaleTimeString('en-US', options);
+  
+  document.querySelector('.container__header__time h1').textContent = timeString;
+}
+
+// time function calling
+updateTime();
+
+// updating time every 1000ms (1 second )
+setInterval(updateTime, 1000);
+
 todoCreateButton.addEventListener("click", () => {
   const value = todoInput.value;
   if (value === "") {
@@ -14,11 +42,15 @@ todoCreateButton.addEventListener("click", () => {
   console.log(todoValues);
   todoInput.value = "";
 
-  todoElements = todoValues.map((val) => {
+  renderTodos(); // Render the updated todo list
+});
+
+function renderTodos() {
+  todoElements = todoValues.map((val, index) => {
     return `<div class="todo__item">
           <div class="todo__item__left">
-            <input type="checkbox" id="completed" name="completed" />
-            <span>${val}</span>
+            <input type="checkbox" id="completed-${index}" name="completed" />
+            <span class="todo-text">${val}</span>
           </div>
           <div class="todo__item__right">
             <svg
@@ -32,7 +64,6 @@ todoCreateButton.addEventListener("click", () => {
               stroke-width="2"
               stroke-linecap="round"
               stroke-linejoin="round"
-              class="lucide lucide-trash"
             >
               <path d="M3 6h18" />
               <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
@@ -41,6 +72,28 @@ todoCreateButton.addEventListener("click", () => {
           </div>
         </div>`;
   });
-  console.log(todoElements.join(" "));
-  todoContainer.innerHTML = todoElements.join(" ");
-});
+
+  todoContainer.innerHTML = todoElements.join(" "); 
+
+  // check box eventlitner
+  document.querySelectorAll('input[type="checkbox"]').forEach((checkbox, index) => {
+    checkbox.addEventListener("change", (event) => {
+      const todoText = checkbox.nextElementSibling;
+      if (event.target.checked) {
+        todoText.style.textDecoration = "line-through"; // Cross out the text when checked
+        todoText.style.color = "red"; // Change text color to red when checked
+      } else {
+        todoText.style.textDecoration = "none"; // remove the crossed line
+        todoText.style.color = "black"; // change back to previous status
+      }
+    });
+  });
+
+  //Delete buttons event listner
+  document.querySelectorAll(".todo__delete__button").forEach((button, index) => {
+    button.addEventListener("click", () => {
+      todoValues.splice(index, 1); // removing the value from array
+      renderTodos();
+    });
+  });
+}
